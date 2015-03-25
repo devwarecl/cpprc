@@ -3,8 +3,7 @@
  * @author Felipe Apablaza
  *
  * Generate a compilation unit with the binary data of the specified file. 
- * Allows embedding any file inside a C++ program.
- * 
+ * Allows the embedding of any file (binary or text) inside a C++ program.
  */
 
 #include <sstream>
@@ -66,26 +65,6 @@ private:
 		return dataStr;
 	}
 
-private:
-	/*
-	std::string generateHeader(const std::map<std::string, Resource>& resources) const {
-		std::string header = "";
-
-		header += "#ifndef __${DEFINE}_HPP__\n";
-		header += "#define __${DEFINE}_HPP__\n";
-		header += "struct ResourcePack {\n";
-
-		for (auto it=resources.begin(); it!=resources.end(); it++) {
-
-		}
-
-		header += "};\n";
-		header += "#endif\n";
-
-		return header;
-	}
-	*/
-
 public:
 	SimpleResourceGenerator() {
 		this->templateHpp += "#ifndef __" + defineKey + "_HPP__\n";
@@ -133,9 +112,9 @@ int main(int argc, char **argv)
 
 		desc.add_options()
 			("help,h", "Produce help message")
-			("input", po::value<fs::path>()->required(),  "Input file (text or binary)")
-			("output,o", po::value<fs::path>(),  "Output compile unit");
-
+			("input", po::value<fs::path>()->required(),  "Input ASCII or binary file")
+			("output-path,o", po::value<fs::path>(),  "Output path (defaults to current path)");
+			
 		po::variables_map vm;
 
 		try {
@@ -159,6 +138,19 @@ int main(int argc, char **argv)
 				throw std::runtime_error("'" + inputFile.string() + "' must be a file, not a directory.");
 			}
 
+			// Process output directory parameter
+			fs::path outputPath;
+			if (vm.count("output-path")) {
+				outputPath =  vm["output-path"].as<fs::path>();
+			} else {
+				outputPath = fs::current_path();
+			}
+
+			// Output parameter validation
+			if (outputPath.has_filename() || !fs::exists(outputPath) || fs::is_regular_file(outputPath)) {
+				throw std::runtime_error("The output path '" + outputPath.parent_path().string() + "' is invalid.");
+			}
+
 			// Open the file an try to get its data
 			std::fstream fileHandle;
 			fileHandle.open(inputFile.string().c_str(), std::ios_base::in | std::ios_base::binary);
@@ -167,7 +159,7 @@ int main(int argc, char **argv)
 			}
 			
 			// Load the file data
-			std::vector<char> fileData ( static_cast<unsigned int>(fs::file_size(inputFile)) );
+			std::vector<char> fileData (static_cast<unsigned int>(fs::file_size(inputFile)));
 			fileHandle.read(fileData.data(), fileData.size());
 
 			// Generate the compile unit
@@ -178,8 +170,7 @@ int main(int argc, char **argv)
 			CompileUnit unit = generator.generate(name, resource);
 
 			// Finally, store the data
-			// By default, use the same path as the input file.
-			fs::path parentPath = inputFile.parent_path();
+			fs::path parentPath = outputPath;
 			fs::path headerFile = parentPath / (name + ".hpp");
 			fs::path implFile = parentPath / (name + ".cpp");
 
@@ -202,7 +193,7 @@ int main(int argc, char **argv)
 			implHandle.flush();
 
 			return 0;
-		} catch ( po::error &exp) {
+		} catch (po::error &exp) {
 			std::cout << "Error: " << exp.what() << std::endl;
 			std::cout << desc << std::endl;
 			return 1;
