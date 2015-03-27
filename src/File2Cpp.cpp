@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 			}
 
 			// Output parameter validation
-			if (outputPath.has_filename() || !fs::exists(outputPath) || fs::is_regular_file(outputPath)) {
+			if (!fs::exists(outputPath) || fs::is_regular_file(outputPath)) {
 				throw std::runtime_error("The output path '" + outputPath.parent_path().string() + "' is invalid.");
 			}
 
@@ -159,7 +159,8 @@ int main(int argc, char **argv)
 			}
 			
 			// Load the file data
-			std::vector<char> fileData (static_cast<unsigned int>(fs::file_size(inputFile)));
+			std::vector<char> fileData;
+			fileData.resize(static_cast<unsigned int>(fs::file_size(inputFile)));
 			fileHandle.read(fileData.data(), fileData.size());
 
 			// Generate the compile unit
@@ -196,9 +197,11 @@ int main(int argc, char **argv)
 		} catch (po::error &exp) {
 			std::cout << "Error: " << exp.what() << std::endl;
 			std::cout << desc << std::endl;
+
 			return 1;
 		} catch (std::runtime_error &exp) {
 			std::cout << "Runtime Error: " << exp.what() << std::endl;
+
 			return 2;
 		}
 	} catch (std::exception &exp) {
