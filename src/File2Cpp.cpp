@@ -80,17 +80,21 @@ public:
 
 	virtual ~SimpleResourceGenerator() {}
 
-	virtual CompileUnit generate(const std::string &name, const Resource &resource) override {
+	virtual CompileUnit generate(const std::string &name_, const Resource &resource) override {
+		std::string name = name_;
+		std::string identifierName = name_;
 		std::string hpp = this->templateHpp;
 		std::string cpp = this->templateCpp;
 		
+		boost::replace_all(identifierName, ".", "_");
+
 		// generate header
-		boost::replace_all(hpp, defineKey, boost::to_upper_copy(name));
-		boost::replace_all(hpp, variableKey, boost::to_lower_copy(name));
-			
+		boost::replace_all(hpp, defineKey, boost::to_upper_copy(identifierName));
+		boost::replace_all(hpp, variableKey, boost::to_lower_copy(identifierName));
+		
 		// generate impl
 		boost::replace_all(cpp, headerKey, name);
-		boost::replace_all(cpp, variableKey, boost::to_lower_copy(name));
+		boost::replace_all(cpp, variableKey, boost::to_lower_copy(identifierName));
 		boost::replace_all(cpp, dataKey, this->generateData(resource.data, resource.size));
 		boost::replace_all(cpp, sizeKey, std::to_string(resource.size));
 
@@ -164,7 +168,7 @@ int main(int argc, char **argv)
 			fileHandle.read(fileData.data(), fileData.size());
 
 			// Generate the compile unit
-			std::string name = inputFile.stem().string();
+			std::string name = inputFile.filename().string();
 			Resource resource(fileData.data(), fileData.size());
 			SimpleResourceGenerator generator;
 
