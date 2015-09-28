@@ -12,6 +12,8 @@ include_directories(${Boost_INCLUDE_DIR})
 
 add_executable(file2cpp File2Cpp.cpp)
 
+set_property(TARGET file2cpp PROPERTY CXX_STANDARD 14)
+
 target_link_libraries(file2cpp ${Boost_LIBRARIES})
 
 install(TARGETS file2cpp DESTINATION bin)
