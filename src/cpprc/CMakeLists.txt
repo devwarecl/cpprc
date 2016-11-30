@@ -3,8 +3,12 @@ set (target cpprc)
 
 set (sources 
     cpprc.cpp 
-    ResourceGenerator.hpp ResourceGenerator.cpp
-    SimpleResourceGenerator.hpp SimpleResourceGenerator.cpp
+    ResourceGenerator.hpp 
+	ResourceGenerator.cpp
+    SimpleResourceGenerator.hpp 
+	SimpleResourceGenerator.cpp
+	MainResourceGenerator.hpp 
+	MainResourceGenerator.cpp
 )
 
 source_group(\\ FILES ${sources})

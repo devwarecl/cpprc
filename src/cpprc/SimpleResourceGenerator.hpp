@@ -16,10 +16,7 @@ namespace cpprc {
         const std::string variableKey = "${VARIABLE}";
         const std::string dataKey = "${DATA}";
         const std::string sizeKey = "${SIZE}";
-    
-    private:
-        std::string generateData(const char *data, int size) const;
-
+        
     public:
         SimpleResourceGenerator();
 

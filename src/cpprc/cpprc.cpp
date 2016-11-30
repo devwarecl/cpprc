@@ -1,3 +1,4 @@
+
 /**
  * @file file2cpp
  * @author Felipe Apablaza
@@ -15,6 +16,7 @@
 #include <boost/filesystem.hpp>
 
 #include "SimpleResourceGenerator.hpp"
+#include "MainResourceGenerator.hpp"
 
 int main(int argc, char **argv) 
 {
@@ -31,7 +33,8 @@ int main(int argc, char **argv)
         desc.add_options()
             ("help,h", "Produce help message")
             ("input", po::value<fs::path>()->required(),  "Input ASCII or binary file")
-            ("output-path,o", po::value<fs::path>(),  "Output path (defaults to current path)");
+            ("output-path,o", po::value<fs::path>(),  "Output path (defaults to current path)")
+            ("style,s", po::value<std::string>(), "Generator style (raw[default], cpprc)");
             
         po::variables_map vm;
 
@@ -69,6 +72,25 @@ int main(int argc, char **argv)
                 throw std::runtime_error("The output path '" + outputPath.parent_path().string() + "' is invalid.");
             }
 
+            // Process style resource compile unit generator
+            std::unique_ptr<cpprc::ResourceGenerator> generator;
+
+            std::string style = vm["style"].as<std::string>();
+
+            if (style == "") {
+                style = "raw";
+            }
+
+            if (style!="raw" && style!="cpprc") {
+                throw std::runtime_error("The specified generator style '" + style + "' isn't valid.");
+            }
+
+            if (style == "raw") {
+                generator = std::make_unique<cpprc::SimpleResourceGenerator>();
+            } else if (style == "cpprc") {
+                generator = std::make_unique<cpprc::MainResourceGenerator>();
+            }
+
             // Open the file an try to get its data
             std::fstream fileHandle;
             fileHandle.open(inputFile.string().c_str(), std::ios_base::in | std::ios_base::binary);
@@ -84,9 +106,8 @@ int main(int argc, char **argv)
             // Generate the compile unit
             std::string name = inputFile.filename().string();
             cpprc::Resource resource(fileData.data(), fileData.size());
-            cpprc::SimpleResourceGenerator generator;
 
-            cpprc::CompileUnit unit = generator.generate(name, resource);
+            cpprc::CompileUnit unit = generator->generate(name, resource);
 
             // Finally, store the data
             fs::path parentPath = outputPath;

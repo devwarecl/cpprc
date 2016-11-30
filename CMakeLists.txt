@@ -1,4 +1,6 @@
 
+project(cpprc)
+
 cmake_minimum_required(VERSION 3.0)
 
 set (Boost_USE_STATIC_LIBS OFF)
@@ -12,6 +14,7 @@ find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIR})
 
-project(cpprc)
+include_directories(.)
 
-add_subdirectory(src)
+add_subdirectory(src/cpprc)
+add_subdirectory(src/libcpprc)

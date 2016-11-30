@@ -26,6 +26,9 @@ namespace cpprc {
     public:
         virtual ~ResourceGenerator();
         virtual CompileUnit generate(const std::string &name, const Resource &resource) = 0;
+
+    protected:
+        std::string generateData(const char *data, int size) const;
     };
 }
 
