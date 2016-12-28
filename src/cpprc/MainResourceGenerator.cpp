@@ -8,19 +8,35 @@
 namespace cpprc {
     MainResourceGenerator::MainResourceGenerator() {
         m_sourceTemplate = R"(
+#include "${FileName}.hpp"
 
+#include <cpprc/Resource.hpp>
 #include <cpprc/ResourceManager.hpp>
 
-namespace {
-    static const char s_${Name}_data[] = {${Data}};
-    static const int s_${Name}_size = ${Size};
+using namespace cpprc;
 
-    cpprc::ResourceManager::getInstance()->add(
-        "${FileName}", 
-        std::make_unique<Resource>(s_${Name}_data, s_${Name}_size)
-    );
-}
-        )";
+const char s_${Name}_data[] = {${Data}};
+const int s_${Name}_size = ${Size};
+/*
+const bool s_${Name}_temp = ResourceManager::getInstance()->add(
+    "${FileName}", 
+    std::make_unique<Resource>((const std::uint8_t*)s_${Name}_data, s_${Name}_size)
+);
+*/
+)";
+
+        m_headerTemplate = R"(
+#pragma once
+
+#ifndef __${Name}_hpp__
+#define __${Name}_hpp__
+
+    extern const char s_${Name}_data[];
+    extern const int s_${Name}_size;
+    extern const bool s_${Name}_temp;
+
+#endif
+)";
     }
 
     MainResourceGenerator::~MainResourceGenerator() {}
@@ -50,9 +66,11 @@ namespace {
 
         CompileUnit unit;
 
+        unit.header = m_headerTemplate;
         unit.implementation = m_sourceTemplate;
 
         for (const auto &pair : properties) {
+            boost::replace_all(unit.header, pair.first, pair.second);
             boost::replace_all(unit.implementation, pair.first, pair.second);
         }
 

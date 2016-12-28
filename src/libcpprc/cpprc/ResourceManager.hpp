@@ -16,14 +16,16 @@ namespace cpprc {
 
         virtual Resource* get(const std::string &name) = 0;
 
-        virtual void add(const std::string &name, std::unique_ptr<Resource> resource) = 0;
+        virtual std::string getString(const std::string &name) = 0;
+
+        virtual bool add(const std::string &name, std::unique_ptr<Resource> resource) = 0;
         
         virtual std::unique_ptr<Resource> remove(const std::string &name) = 0;
         
         virtual void erase(const std::string &name) = 0;
 
     public:
-        static ResourceManager* getInstance();
+        static cpprc::ResourceManager* getInstance();
     };
 }
 
