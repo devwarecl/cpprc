@@ -20,3 +20,8 @@ set_property(TARGET ${target} PROPERTY CXX_STANDARD 14)
 target_link_libraries(${target} ${Boost_LIBRARIES})
 
 install(TARGETS ${target} DESTINATION bin)
+
+set (CPPRC_BINARY ${CMAKE_CURRENT_BINARY_DIR}/${target})
+set (CPPRC_BINARY "${CPPRC_BINARY}" CACHE INTERNAL "CPPRC_BINARY")
+
+message (${CPPRC_BINARY})

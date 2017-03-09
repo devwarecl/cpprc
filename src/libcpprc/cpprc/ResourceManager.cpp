@@ -4,6 +4,7 @@
 
 #include <map>
 #include <memory>
+#include <cstring>
 
 #if defined(_DEBUG)
 #include <iostream>
